@@ -21,7 +21,7 @@ router.get('/', async (req, res) => {
     const count = await Post.countDocuments();
     const totalPages = Math.ceil(count / perPage);
     const nextPage = page < totalPages ? page + 1 : null;
-
+ 
     res.render('index', {
       locals,
       posts,
