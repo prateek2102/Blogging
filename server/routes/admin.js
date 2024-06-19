@@ -13,6 +13,7 @@ router.get("/admin", async (req, res) => {
     const locals = {
       title: "Admin",
       description: "First Blog about Nodejs",
+      layout: adminLayout,
     };
 
     res.render("admin/index", { locals, layout: adminLayout });
@@ -35,6 +36,66 @@ const authMiddleWare = (req, res, next) => {
     return res.status(401).json({ message: "Unauthorized" });
   }
 };
+
+router.get("/add-post", authMiddleWare, async (req, res) => {
+  try {
+    const locals = {
+      title: "Add Post",
+      description: "Nodejs Blog",
+    };
+    res.render("admin/add-post", {
+      locals,
+      layout: adminLayout,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+router.post("/add-post", authMiddleWare, async (req, res) => {
+  try {
+    const newPost = new Post({
+      title: req.body.title,
+      body: req.body.body,
+    });
+
+    await Post.create(newPost);
+    res.redirect("/dashboard");
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+router.get("/edit-post/:id", authMiddleWare, async (req, res) => {
+  try {
+    const locals = {
+      title: "Edit Post",
+      description: "Free User Management System",
+    };
+    const data = await Post.findOne({ _id: req.params.id });
+    res.render("admin/edit-post", {
+      locals,
+      data,
+      layout: adminLayout,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// Edit post api
+router.put("/edit-post/:id", authMiddleWare, async (req, res) => {
+  try {
+    await Post.findByIdAndUpdate(req.params.id, {
+      title: req.body.title,
+      body: req.body.body,
+      updatedAt: Date.now(),
+    });
+    res.redirect(`/edit-post/${req.params.id}`);
+  } catch (error) {
+    console.log(error);
+  }
+});
 
 // Admin login
 // Testing purposes
@@ -77,7 +138,17 @@ router.post("/admin", async (req, res) => {
 // Dashboard Route
 router.get("/dashboard", authMiddleWare, async (req, res) => {
   try {
-    res.render("admin/dashboard");
+    const locals = {
+      title: "Admin",
+      description: "First Blog about Nodejs",
+      layout: adminLayout,
+    };
+    const data = await Post.find();
+    res.render("admin/dashboard", {
+      locals,
+      data,
+      layout: adminLayout,
+    });
   } catch (Error) {}
 });
 
